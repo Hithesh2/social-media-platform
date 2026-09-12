@@ -1,16 +1,45 @@
-# React + Vite
+# Red Cross Social Media Content Management Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React and Firebase-based Social Media Content Management Platform designed to manage, approve, schedule, and analyze social media content for the Red Cross Society.
 
-Currently, two official plugins are available:
+## Live Demo
+🔗 https://your-hosted-url.com
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
+- Role-based authentication
+- Content creation and CRUD
+- Approval workflow
+- Post scheduling
+- Campaign management
+- Analytics dashboard
+- Social media strategy page
+- Privacy & compliance
+- User management
 
-## React Compiler
+## Tech Stack
+- React
+- JavaScript
+- Vite
+- Bootstrap
+- Firebase Authentication
+- Firestore
+- Firebase Storage
+- Recharts
+- React Icons
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## User Roles
+- Administrator
+- Content Creator
+- Content Approver
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+```text
+src/
+├── components/
+├── context/
+├── firebase/
+├── pages/
+├── services/
+├── App.jsx
+├── main.jsx
+└── index.css
