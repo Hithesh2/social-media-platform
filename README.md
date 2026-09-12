@@ -3,7 +3,7 @@
 A React and Firebase-based Social Media Content Management Platform designed to manage, approve, schedule, and analyze social media content for the Red Cross Society.
 
 ## Live Demo
-🔗 https://your-hosted-url.com
+🔗 https://redcross-social-media-platform.web.app
 
 ## Features
 - Role-based authentication
