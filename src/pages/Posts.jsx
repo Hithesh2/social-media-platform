@@ -34,6 +34,7 @@ export default function Posts() {
   const [platformFilter, setPlatformFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [previewPost, setPreviewPost] = useState(null);
+  const [previewPlatform, setPreviewPlatform] = useState('facebook'); // 'facebook' | 'instagram' | 'twitter'
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -200,11 +201,7 @@ export default function Posts() {
                     {/* Card Footer */}
                     <div className="post-card__footer">
                       <div className="post-card__author">
-                        <span className="author-avatar">
-                          {post.creator
-                            ? post.creator.split(' ').map((n) => n[0]).join('').slice(0, 2)
-                            : 'RC'}
-                        </span>
+                        <FiUser size={14} style={{ color: '#047857' }} />
                         <div>
                           <strong>{post.creator}</strong>
                           <span>{post.date}</span>
@@ -310,23 +307,64 @@ export default function Posts() {
             </div>
           )}
 
-          {/* Interactive Preview Modal */}
+          {/* Interactive Multi-Platform Live Preview Modal */}
           {previewPost && (
             <div className="modal-backdrop" onClick={() => setPreviewPost(null)}>
               <div className="rc-card preview-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="preview-modal__header">
-                  <h3>Post Live Preview</h3>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '18px', color: '#0F172A' }}>Social Media Live Channel Preview</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748B' }}>Interactive multi-platform feed simulation with emblem compliance check</p>
+                  </div>
                   <button type="button" className="close-btn" onClick={() => setPreviewPost(null)}>
                     <FiX size={18} />
                   </button>
                 </div>
 
+                {/* Platform Selector Tabs */}
+                <div className="pm-platform-selector">
+                  <button
+                    type="button"
+                    className={`pm-plat-tab${previewPlatform === 'facebook' ? ' is-active fb' : ''}`}
+                    onClick={() => setPreviewPlatform('facebook')}
+                  >
+                    <FiFacebook size={14} /> Facebook Feed
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`pm-plat-tab${previewPlatform === 'instagram' ? ' is-active ig' : ''}`}
+                    onClick={() => setPreviewPlatform('instagram')}
+                  >
+                    <FiInstagram size={14} /> Instagram Grid
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`pm-plat-tab${previewPlatform === 'twitter' ? ' is-active tw' : ''}`}
+                    onClick={() => setPreviewPlatform('twitter')}
+                  >
+                    <FiTwitter size={14} /> X (Twitter) Feed
+                  </button>
+                </div>
+
                 <div className="preview-modal__body">
-                  <div className="preview-card-shell">
+                  {/* Red Cross Emblem Compliance Telemetry Bar */}
+                  <div className="pm-emblem-audit-bar">
+                    <span className="pm-emblem-badge">
+                      <span className="pm-emblem-dot" /> 🟢 Emblem Dignity Audit: 100% Compliant
+                    </span>
+                    <span style={{ fontSize: '11.5px', color: '#059669', fontWeight: 600 }}>
+                      Verified Beneficiary Media Privacy & Geneva Emblem Clearance
+                    </span>
+                  </div>
+
+                  {/* Multi-Platform Feed Mockup Card */}
+                  <div className={`preview-card-shell plat-${previewPlatform}`}>
                     <div className="preview-card-shell__top">
                       <div className="author-avatar">{previewPost.creator ? previewPost.creator[0] : 'R'}</div>
                       <div>
-                        <strong>Red Cross Society</strong>
+                        <strong>Sri Lanka Red Cross Society {previewPlatform === 'twitter' && <span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: 500 }}>@RedCrossLK</span>}</strong>
                         <span>By {previewPost.creator} • {previewPost.date}</span>
                       </div>
                       <span className={`badge-status ${previewPost.status}`} style={{ marginLeft: 'auto' }}>
@@ -345,6 +383,33 @@ export default function Posts() {
                         </p>
                       )}
                     </div>
+
+                    {/* Social Interaction Buttons Mockup */}
+                    <div className="pm-social-actions-bar">
+                      {previewPlatform === 'facebook' && (
+                        <div className="pm-fb-actions">
+                          <span>👍 Like</span>
+                          <span>💬 Comment</span>
+                          <span>↪ Share</span>
+                        </div>
+                      )}
+                      {previewPlatform === 'instagram' && (
+                        <div className="pm-ig-actions">
+                          <span>❤️ 1,480 Likes</span>
+                          <span>💬 84 Comments</span>
+                          <span>🔖 Saved</span>
+                        </div>
+                      )}
+                      {previewPlatform === 'twitter' && (
+                        <div className="pm-tw-actions">
+                          <span>💬 42</span>
+                          <span>🔁 128 Reposts</span>
+                          <span>❤️ 512 Likes</span>
+                          <span>📊 12.4k Views</span>
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -354,16 +419,17 @@ export default function Posts() {
       </div>
 
       <style>{`
+        /* Hero Topic Header - Matching Dashboard Box Colors */
         .posts-hero-card {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(135deg, #0F172A 0%, #1E293B 45%, #991B1B 100%);
+          background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #500B15 100%);
           border: 1px solid rgba(254, 202, 202, 0.25);
           border-radius: 18px;
           padding: 26px 32px;
           margin-bottom: 24px;
-          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 14px rgba(200, 16, 46, 0.2);
+          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 16px rgba(80, 11, 21, 0.25);
         }
 
         .posts-badge {
@@ -391,34 +457,35 @@ export default function Posts() {
           font-family: var(--font-heading);
           letter-spacing: -0.025em;
           margin-bottom: 4px;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .posts-hero-info p {
           font-size: 14px;
           color: #E2E8F0;
+          font-weight: 500;
         }
 
         .posts-create-btn {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+          background: linear-gradient(135deg, #059669 0%, #10B981 100%);
           color: #FFFFFF;
           border: 1px solid rgba(255, 255, 255, 0.2);
-          padding: 10px 20px;
-          border-radius: 10px;
+          padding: 11px 22px;
+          border-radius: 12px;
           font-size: 13.5px;
-          font-weight: 700;
+          font-weight: 800;
           font-family: var(--font-heading);
           cursor: pointer;
-          box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .posts-create-btn:hover {
           transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+          box-shadow: 0 6px 22px rgba(16, 185, 129, 0.45);
         }
 
         /* Filter Bar */
@@ -430,6 +497,10 @@ export default function Posts() {
           padding: 14px 18px;
           margin-bottom: 22px;
           flex-wrap: wrap;
+          background: #FFFFFF;
+          border: 1px solid #E2E8F0;
+          border-radius: 16px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
 
         .posts-search {
@@ -518,18 +589,22 @@ export default function Posts() {
           gap: 22px;
         }
 
+        /* Large Post Grid Cards - Soft Healing Light Green Fade */
         .post-card {
           display: flex;
           flex-direction: column;
-          border-radius: 16px;
+          border-radius: 18px;
           overflow: hidden;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          border: 1px solid #E5E7EB;
+          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+          background: linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(240, 253, 244, 0.95) 100%);
+          border: 1.5px solid #A7F3D0;
+          box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
         }
 
         .post-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 14px 30px rgba(16, 185, 129, 0.18);
+          border-color: #6EE7B7;
         }
 
         .post-card__media {
@@ -537,7 +612,7 @@ export default function Posts() {
           width: 100%;
           height: 200px;
           overflow: hidden;
-          background: #F3F4F6;
+          background: #E6F4EA;
         }
 
         .post-card__media img {
@@ -548,7 +623,7 @@ export default function Posts() {
         }
 
         .post-card:hover .post-card__media img {
-          transform: scale(1.04);
+          transform: scale(1.05);
         }
 
         .post-card__badges {
@@ -585,14 +660,15 @@ export default function Posts() {
         .post-card__title {
           font-size: 16.5px;
           font-weight: 800;
-          color: #1F2937;
+          color: #064E3B;
           margin-bottom: 8px;
           line-height: 1.3;
+          font-family: var(--font-heading);
         }
 
         .post-card__caption {
           font-size: 13.5px;
-          color: #4B5563;
+          color: #166534;
           line-height: 1.5;
           margin-bottom: 14px;
           display: -webkit-box;
@@ -609,12 +685,14 @@ export default function Posts() {
         }
 
         .post-hashtag {
-          font-size: 12px;
-          font-weight: 600;
-          color: #2563EB;
-          background: #EFF6FF;
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #047857;
+          background: #D1FAE5;
+          border: 1px solid #A7F3D0;
           padding: 3px 8px;
           border-radius: 6px;
+          font-family: var(--font-heading);
         }
 
         .post-card__footer {
@@ -622,8 +700,9 @@ export default function Posts() {
           justify-content: space-between;
           align-items: center;
           padding: 14px 20px;
-          border-top: 1px solid #F3F4F6;
-          background: #FAFBFD;
+          border-top: 1px solid #D1FAE5;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(4px);
         }
 
         .post-card__author {
@@ -636,13 +715,14 @@ export default function Posts() {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #C8102E 0%, #A80F28 100%);
+          background: linear-gradient(135deg, #059669 0%, #047857 100%);
           color: #FFFFFF;
           font-size: 12px;
-          font-weight: 700;
+          font-weight: 800;
           display: flex;
           align-items: center;
           justify-content: center;
+          box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
         }
 
         .post-card__author div {
@@ -653,12 +733,13 @@ export default function Posts() {
 
         .post-card__author strong {
           font-size: 12.5px;
-          color: #1F2937;
+          color: #064E3B;
+          font-weight: 800;
         }
 
         .post-card__author span {
           font-size: 11px;
-          color: #6B7280;
+          color: #047857;
         }
 
         .post-card__actions {
@@ -670,20 +751,23 @@ export default function Posts() {
           display: flex;
           align-items: center;
           gap: 4px;
-          padding: 6px 10px;
+          padding: 6px 12px;
           border-radius: 8px;
-          border: 1px solid #D1D5DB;
+          border: 1px solid #A7F3D0;
           background: #FFFFFF;
-          color: #374151;
+          color: #065F46;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
+          font-family: var(--font-heading);
           cursor: pointer;
-          transition: all 0.12s ease;
+          transition: all 0.15s ease;
         }
 
         .card-action-btn:hover {
-          background: #F3F4F6;
-          border-color: #9CA3AF;
+          background: #ECFDF5;
+          border-color: #10B981;
+          color: #047857;
+          transform: translateY(-1px);
         }
 
         .card-action-btn.danger:hover {
@@ -696,8 +780,11 @@ export default function Posts() {
         .empty-posts {
           text-align: center;
           padding: 48px;
-          color: #6B7280;
+          color: #047857;
           font-size: 14px;
+          background: #ECFDF5;
+          border: 1.5px dashed #A7F3D0;
+          border-radius: 16px;
         }
 
         /* Table View */
@@ -738,25 +825,97 @@ export default function Posts() {
 
         .close-btn { border: none; background: #F3F4F6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        .preview-card-shell {
-          border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; background: #FFFFFF;
+        /* Multi-Platform Live Preview Styles */
+        .pm-platform-selector {
+          display: flex;
+          gap: 8px;
+          background: #F1F5F9;
+          padding: 4px;
+          border-radius: 10px;
+          margin-bottom: 16px;
         }
 
-        .preview-card-shell__top {
-          display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #F3F4F6;
+        .pm-plat-tab {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 7px 10px;
+          border-radius: 8px;
+          border: none;
+          background: transparent;
+          color: #64748B;
+          font-size: 12px;
+          font-weight: 700;
+          font-family: var(--font-heading);
+          cursor: pointer;
+          transition: all 0.15s ease;
         }
 
-        .preview-card-shell__img {
-          width: 100%; max-height: 320px; object-fit: cover;
+        .pm-plat-tab.is-active {
+          background: #FFFFFF;
+          color: #0F172A;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
         }
 
-        .preview-card-shell__content {
-          padding: 16px;
+        .pm-plat-tab.is-active.fb { color: #1877F2; }
+        .pm-plat-tab.is-active.ig { color: #E4405F; }
+        .pm-plat-tab.is-active.tw { color: #0F172A; }
+
+        .pm-emblem-audit-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #ECFDF5;
+          border: 1px solid #A7F3D0;
+          padding: 8px 12px;
+          border-radius: 10px;
+          margin-bottom: 14px;
         }
 
-        .preview-card-shell__content h2 { font-size: 16px; margin-bottom: 8px; }
-        .preview-card-shell__content p { font-size: 13.5px; color: #374151; line-height: 1.5; }
-        .preview-card-shell__tags { font-size: 12.5px; color: #2563EB; font-weight: 600; margin-top: 8px; }
+        .pm-emblem-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 800;
+          color: #059669;
+          font-family: var(--font-heading);
+        }
+
+        .pm-emblem-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #10B981;
+          box-shadow: 0 0 6px #10B981;
+        }
+
+        .pm-social-actions-bar {
+          padding: 12px 16px;
+          background: #F8FAFC;
+          border-top: 1px solid #E2E8F0;
+          font-size: 12px;
+          font-weight: 700;
+          color: #475569;
+          font-family: var(--font-heading);
+        }
+
+        .pm-fb-actions, .pm-ig-actions, .pm-tw-actions {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+        }
+
+        .pm-fb-actions span, .pm-ig-actions span, .pm-tw-actions span {
+          cursor: pointer;
+          transition: color 0.12s ease;
+        }
+
+        .pm-fb-actions span:hover, .pm-ig-actions span:hover, .pm-tw-actions span:hover {
+          color: #1877F2;
+        }
       `}</style>
     </div>
   );

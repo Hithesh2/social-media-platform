@@ -18,6 +18,7 @@ import {
   FiUserCheck,
   FiX,
   FiSend,
+  FiUser,
 } from 'react-icons/fi';
 import {
   ResponsiveContainer,
@@ -158,6 +159,53 @@ export default function Dashboard() {
               <StatCard key={s.key} label={s.label} value={s.value} icon={s.icon} tone={s.tone} />
             ))}
           </section>
+
+          {/* Social Channel Live Connection Telemetry Bar */}
+          <div className="db-channel-telemetry-bar">
+            <div className="db-channel-item">
+              <div className="db-ch-icon fb"><FiFacebook size={16} /></div>
+              <div className="db-ch-info">
+                <strong>Facebook Broadcast</strong>
+                <span>142.5k Reach • Live Connected</span>
+              </div>
+              <span className="db-ch-status-pill green">
+                <span className="db-ch-dot" /> Connected
+              </span>
+            </div>
+
+            <div className="db-channel-item">
+              <div className="db-ch-icon ig"><FiInstagram size={16} /></div>
+              <div className="db-ch-info">
+                <strong>Instagram Business</strong>
+                <span>98.2k Impression • Live Syncing</span>
+              </div>
+              <span className="db-ch-status-pill green">
+                <span className="db-ch-dot" /> Sync Active
+              </span>
+            </div>
+
+            <div className="db-channel-item">
+              <div className="db-ch-icon tw"><FiTwitter size={16} /></div>
+              <div className="db-ch-info">
+                <strong>X (Twitter) Channel</strong>
+                <span>64.8k Reach • Verified</span>
+              </div>
+              <span className="db-ch-status-pill green">
+                <span className="db-ch-dot" /> Active
+              </span>
+            </div>
+
+            <div className="db-channel-item emblem">
+              <div className="db-ch-icon rc"><FiCheckCircle size={16} /></div>
+              <div className="db-ch-info">
+                <strong>Emblem & Privacy Audit</strong>
+                <span>98.4% Dignity Compliance</span>
+              </div>
+              <span className="db-ch-status-pill red">
+                <span className="db-ch-dot red" /> Audit Verified
+              </span>
+            </div>
+          </div>
 
           {/* Analytics Chart */}
           <section className="rc-card rc-panel db-xray-panel" aria-label="Engagement overview">
@@ -307,8 +355,8 @@ export default function Dashboard() {
 
                             <td>
                               <div className="db-creator-pill" title={p.creator}>
-                                <span className="db-creator-avatar">{creatorInitials}</span>
-                                <span>{p.creator ? p.creator.split(' ')[0] : 'Officer'}</span>
+                                <FiUser size={13} style={{ color: '#FCA5A5' }} />
+                                <span>{p.creator ? p.creator : 'Officer'}</span>
                               </div>
                             </td>
 
@@ -490,12 +538,12 @@ export default function Dashboard() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(135deg, #0F172A 0%, #1E293B 45%, #991B1B 100%);
+          background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #500B15 100%);
           border: 1px solid rgba(254, 202, 202, 0.25);
           border-radius: 18px;
           padding: 26px 32px;
           margin-bottom: 24px;
-          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 14px rgba(200, 16, 46, 0.2);
+          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 16px rgba(80, 11, 21, 0.25);
           overflow: hidden;
         }
 
@@ -586,6 +634,108 @@ export default function Dashboard() {
           border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        /* Social Channel Telemetry Widget */
+        .db-channel-telemetry-bar {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 14px;
+          margin-bottom: 24px;
+        }
+
+        .db-channel-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #FFFFFF;
+          border: 1px solid #E2E8F0;
+          border-radius: 14px;
+          padding: 12px 14px;
+          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+          transition: all 0.15s ease;
+        }
+
+        .db-channel-item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+          border-color: #CBD5E1;
+        }
+
+        .db-channel-item.emblem {
+          background: linear-gradient(135deg, #FEF2F2 0%, #FFFFFF 100%);
+          border-color: #FCA5A5;
+        }
+
+        .db-ch-icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .db-ch-icon.fb { background: #EFF6FF; color: #1877F2; }
+        .db-ch-icon.ig { background: #FDE8EC; color: #E4405F; }
+        .db-ch-icon.tw { background: #F1F5F9; color: #0F172A; }
+        .db-ch-icon.rc { background: #FEF2F2; color: #DC2626; }
+
+        .db-ch-info {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .db-ch-info strong {
+          font-size: 13px;
+          font-weight: 800;
+          color: #0F172A;
+          font-family: var(--font-heading);
+        }
+
+        .db-ch-info span {
+          font-size: 11px;
+          color: #64748B;
+          font-weight: 600;
+        }
+
+        .db-ch-status-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 10.5px;
+          font-weight: 800;
+          padding: 2px 7px;
+          border-radius: 999px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+        }
+
+        .db-ch-status-pill.green {
+          background: #ECFDF5;
+          color: #059669;
+          border: 1px solid #A7F3D0;
+        }
+
+        .db-ch-status-pill.red {
+          background: #FEF2F2;
+          color: #DC2626;
+          border: 1px solid #FCA5A5;
+        }
+
+        .db-ch-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #10B981;
+          box-shadow: 0 0 6px #10B981;
+        }
+
+        .db-ch-dot.red {
+          background: #DC2626;
+          box-shadow: 0 0 6px #DC2626;
+        }
+
         .db-action-btn--primary:hover {
           transform: translateY(-1px);
           box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
@@ -658,34 +808,66 @@ export default function Dashboard() {
           text-decoration: underline;
         }
 
+        /* Recent Social Broadcasts - Dark Maroon Faded Vibe Panel */
+        .db-recent-posts-panel {
+          background: linear-gradient(135deg, rgba(24, 3, 6, 0.94) 0%, rgba(52, 7, 13, 0.92) 50%, rgba(80, 11, 21, 0.95) 100%) !important;
+          backdrop-filter: blur(12px);
+          border: 1.5px solid rgba(252, 165, 165, 0.28) !important;
+          box-shadow: 0 14px 38px rgba(24, 3, 6, 0.45) !important;
+          border-radius: 20px !important;
+          color: #FFFFFF;
+        }
+
+        .db-recent-posts-panel .rc-panel__header-row h2 {
+          color: #FFFFFF !important;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .db-recent-posts-panel .rc-panel__subtitle {
+          color: #FECDD3 !important;
+          opacity: 0.85;
+        }
+
+        .db-recent-posts-panel .db-link-btn {
+          color: #FCA5A5 !important;
+          font-weight: 800;
+        }
+
         /* Recent Posts In-Place Filter Tabs */
         .db-recent-filters {
           display: flex;
           gap: 6px;
-          margin-bottom: 14px;
-          background: #F8FAFC;
-          padding: 4px;
-          border-radius: 10px;
-          border: 1px solid #F1F5F9;
+          margin-bottom: 16px;
+          background: rgba(0, 0, 0, 0.35);
+          padding: 5px;
+          border-radius: 12px;
+          border: 1px solid rgba(252, 165, 165, 0.2);
         }
 
         .db-rf-tab {
-          padding: 5px 12px;
-          border-radius: 6px;
+          padding: 6px 14px;
+          border-radius: 8px;
           border: none;
           background: transparent;
           font-size: 11.5px;
           font-weight: 700;
-          color: #64748B;
+          color: #FECDD3;
           cursor: pointer;
           font-family: var(--font-heading);
-          transition: all 0.12s ease;
+          transition: all 0.15s ease;
+          opacity: 0.85;
+        }
+
+        .db-rf-tab:hover {
+          opacity: 1;
+          color: #FFFFFF;
         }
 
         .db-rf-tab.is-active {
-          background: #FFFFFF;
-          color: #0F172A;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+          background: linear-gradient(135deg, #C8102E 0%, #991B1B 100%);
+          color: #FFFFFF;
+          opacity: 1;
+          box-shadow: 0 3px 10px rgba(200, 16, 46, 0.4);
         }
 
         /* Posts Table & Row Hover */
@@ -693,8 +875,16 @@ export default function Dashboard() {
           font-size: 11px;
           font-weight: 800;
           text-transform: uppercase;
-          color: #64748B;
+          color: #FECDD3 !important;
+          opacity: 0.8;
           letter-spacing: 0.5px;
+          border-bottom: 1px solid rgba(252, 165, 165, 0.2) !important;
+          padding-bottom: 10px;
+        }
+
+        .db-posts-table td {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+          padding: 12px 8px;
         }
 
         .db-post-row {
@@ -703,40 +893,42 @@ export default function Dashboard() {
         }
 
         .db-post-row:hover {
-          background-color: #FAFBFD !important;
+          background-color: rgba(255, 255, 255, 0.08) !important;
         }
 
         .db-post-cell {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
         }
 
+        /* Prominent Featured Photo Thumbnail */
         .db-post-thumb-wrap {
           position: relative;
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
+          width: 54px;
+          height: 54px;
+          border-radius: 12px;
           overflow: hidden;
           flex-shrink: 0;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+          border: 1.5px solid rgba(254, 202, 202, 0.35);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
 
         .db-post-thumb {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.2s ease;
+          transition: transform 0.25s ease;
         }
 
         .db-post-row:hover .db-post-thumb {
-          transform: scale(1.08);
+          transform: scale(1.12);
         }
 
         .db-thumb-hover-overlay {
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0, 0, 0, 0.35);
+          background: rgba(0, 0, 0, 0.45);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -752,20 +944,21 @@ export default function Dashboard() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          gap: 2px;
         }
 
         .db-post-cell__text strong {
-          font-size: 13.5px;
-          font-weight: 700;
-          color: #0F172A;
+          font-size: 14px;
+          font-weight: 800;
+          color: #FFFFFF !important;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
 
         .db-post-cell__text span {
-          font-size: 11.5px;
-          color: #64748B;
+          font-size: 12px;
+          color: #CBD5E1 !important;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -784,7 +977,7 @@ export default function Dashboard() {
           align-items: center;
           justify-content: center;
           font-size: 12px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         .db-creator-pill {
@@ -793,7 +986,7 @@ export default function Dashboard() {
           gap: 6px;
           font-size: 12px;
           font-weight: 700;
-          color: #334155;
+          color: #F8FAFC !important;
           font-family: var(--font-heading);
         }
 
@@ -801,13 +994,14 @@ export default function Dashboard() {
           width: 22px;
           height: 22px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #C8102E 0%, #A80F28 100%);
+          background: linear-gradient(135deg, #C8102E 0%, #881337 100%);
           color: #FFFFFF;
           font-size: 9.5px;
           font-weight: 800;
           display: flex;
           align-items: center;
           justify-content: center;
+          border: 1px solid rgba(254, 202, 202, 0.4);
         }
 
         .status-dot {
@@ -823,27 +1017,28 @@ export default function Dashboard() {
           display: flex;
           align-items: center;
           justify-content: flex-end;
-          gap: 4px;
+          gap: 6px;
         }
 
         .db-row-action-btn {
-          width: 30px;
-          height: 30px;
-          border-radius: 7px;
-          border: 1px solid #E2E8F0;
-          background: #FFFFFF;
-          color: #64748B;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.12);
+          color: #FFFFFF;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.12s ease;
+          transition: all 0.15s ease;
         }
 
         .db-row-action-btn:hover {
           background: #C8102E;
           color: #FFFFFF;
           border-color: #C8102E;
+          transform: translateY(-1px);
         }
 
         /* Upcoming Schedule */

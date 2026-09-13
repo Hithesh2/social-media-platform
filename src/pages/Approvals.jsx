@@ -618,12 +618,12 @@ export default function Approvals() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(135deg, #0F172A 0%, #064E3B 50%, #047857 100%);
-          border: 1px solid rgba(167, 243, 208, 0.3);
+          background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #500B15 100%);
+          border: 1px solid rgba(254, 202, 202, 0.25);
           border-radius: 18px;
           padding: 26px 32px;
           margin-bottom: 24px;
-          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 14px rgba(5, 150, 105, 0.2);
+          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 16px rgba(80, 11, 21, 0.25);
         }
 
         .appr-compliance-badge {

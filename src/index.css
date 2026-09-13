@@ -141,6 +141,9 @@ p {
   .app-main {
     margin-left: 0;
   }
+  .app-content {
+    padding: 16px 14px 80px;
+  }
 }
 
 /* ── Card Utility ── */

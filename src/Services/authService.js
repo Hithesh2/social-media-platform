@@ -225,7 +225,7 @@ export async function loginWithCredentials(email, password) {
 }
 
 export async function loginWithGoogle(customGoogleDetails) {
-  // If custom Google details were passed directly from the Google Modal
+  // If custom Google details were passed directly
   if (customGoogleDetails && customGoogleDetails.email) {
     const isShared = isSharedAdminEmail(customGoogleDetails.email);
     const googleUser = {
@@ -243,7 +243,7 @@ export async function loginWithGoogle(customGoogleDetails) {
     return googleUser;
   }
 
-  // Attempt real Firebase Google Auth Popup
+  // Real Firebase Google Auth Popup
   if (auth) {
     try {
       const provider = new GoogleAuthProvider();
@@ -268,28 +268,21 @@ export async function loginWithGoogle(customGoogleDetails) {
       await syncUserToFirestore(googleUser);
       return googleUser;
     } catch (error) {
-      console.warn('Google Auth popup notice:', error.code, error.message);
+      console.warn('Google Auth popup error notice:', error.code, error.message);
       if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
         throw new Error('Google Sign-In popup was closed before completing login.');
       }
-      // If popup fails due to missing domain config or local dev restrictions, return structured fallback
+      if (error.code === 'auth/operation-not-allowed') {
+        throw new Error('Google Sign-In is disabled in Firebase Console. Please enable Google under Firebase Auth > Sign-in method.');
+      }
+      if (error.code === 'auth/unauthorized-domain') {
+        throw new Error('Domain not authorized. Please add redcross-social-media-platform.web.app under Firebase Auth > Settings > Authorized Domains.');
+      }
+      throw new Error(error.message || 'Google Sign-In failed. Please try again.');
     }
   }
 
-  const isShared = isSharedAdminEmail('officer.google@redcross.org');
-  const fallbackGoogle = {
-    uid: 'google-usr-' + Date.now(),
-    email: 'officer.google@redcross.org',
-    name: 'Hithesh Maheepala (Google Workspace)',
-    photoURL: null,
-    role: 'Administrator',
-    department: 'National Executive HQ',
-    location: 'Colombo HQ',
-    authProvider: 'google',
-    isSharedTeam: true,
-  };
-  await syncUserToFirestore(fallbackGoogle);
-  return fallbackGoogle;
+  throw new Error('Firebase Authentication is not initialized.');
 }
 
 export async function registerNewUserAccount(details) {

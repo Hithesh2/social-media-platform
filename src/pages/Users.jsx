@@ -637,12 +637,12 @@ export default function Users() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(135deg, #0F172A 0%, #1E293B 45%, #991B1B 100%);
+          background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #500B15 100%);
           border: 1px solid rgba(254, 202, 202, 0.25);
           border-radius: 18px;
           padding: 26px 32px;
           margin-bottom: 24px;
-          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 14px rgba(200, 16, 46, 0.2);
+          box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.25), 0 4px 16px rgba(80, 11, 21, 0.25);
         }
 
         .usr-badge {

@@ -63,7 +63,7 @@ export default function OfficerSelectorModal({
   return (
     <div className="osm-overlay" onClick={onClose}>
       <div className="osm-card" onClick={(e) => e.stopPropagation()}>
-        
+
         {/* Header Banner */}
         <div className="osm-header">
           <div className="osm-badge">

@@ -1,4 +1,4 @@
-export default function StatCard({ label, value, icon: Icon, tone = 'primary' }) {
+export default function StatCard({ label, value, icon: Icon, tone = 'primary', trend = '+12% this week' }) {
   return (
     <div className={`rc-stat-card tone-${tone}`}>
       {/* X-Ray Ray & Grid Background Visual */}
@@ -18,7 +18,15 @@ export default function StatCard({ label, value, icon: Icon, tone = 'primary' })
       </div>
 
       <div className="rc-stat-card__content">
-        <span className="rc-stat-card__value">{value}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="rc-stat-card__value">{value}</span>
+          {trend && (
+            <span className="rc-stat-card__trend">
+              <span className="rc-stat-pulse-dot" />
+              {trend}
+            </span>
+          )}
+        </div>
         <span className="rc-stat-card__label">{label}</span>
       </div>
 
@@ -77,6 +85,34 @@ export default function StatCard({ label, value, icon: Icon, tone = 'primary' })
           font-family: var(--font-heading);
           line-height: 1.1;
           letter-spacing: -0.02em;
+        }
+
+        .rc-stat-card__trend {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 11px;
+          font-weight: 800;
+          font-family: var(--font-heading);
+          background: rgba(255, 255, 255, 0.85);
+          padding: 2px 7px;
+          border-radius: 999px;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .rc-stat-pulse-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #10B981;
+          box-shadow: 0 0 8px #10B981;
+          animation: pulseDot 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+          0%, 100% { transform: scale(0.9); opacity: 0.8; }
+          50% { transform: scale(1.3); opacity: 1; }
         }
 
         .rc-stat-card__label {
