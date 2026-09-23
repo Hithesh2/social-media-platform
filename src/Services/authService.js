@@ -85,6 +85,29 @@ export const DEMO_USERS = {
   },
 };
 
+const REGISTERED_USERS_KEY = 'redcross_registered_users_v1';
+
+export function getStoredUsers() {
+  try {
+    const raw = localStorage.getItem(REGISTERED_USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveStoredUser(userAccount) {
+  try {
+    const existing = getStoredUsers();
+    const cleanEmail = userAccount.email.toLowerCase().trim();
+    const filtered = existing.filter((u) => u.email.toLowerCase().trim() !== cleanEmail);
+    filtered.push(userAccount);
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(filtered));
+  } catch (e) {
+    console.warn('Could not save user to localStorage:', e);
+  }
+}
+
 export function isSharedAdminEmail(email = '') {
   const e = email.toLowerCase().trim();
   return (
@@ -146,20 +169,22 @@ export async function loginWithCredentials(email, password) {
   const cleanPassword = (password || '').trim();
   const targetEmail = cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@redcross.org`;
 
+  if (!cleanEmail) {
+    throw new Error('Please enter your email address.');
+  }
   if (!cleanPassword || cleanPassword.length < 6) {
     throw new Error('Password must be at least 6 characters long.');
   }
 
-  console.log('Attempting Firebase Auth with:', targetEmail);
+  console.log('Attempting authentication for:', targetEmail);
 
-  // Demo user preset checks with password verification
-  if (cleanEmail === 'admin@redcross.org' || cleanEmail === 'admin') {
+  // 1. Check Demo User Presets
+  if (cleanEmail === 'admin@redcross.org' || cleanEmail === 'admin' || cleanEmail === 'admin@admin.org') {
     const validPasses = ['redcross2026!', 'admin123', 'admin', 'redcross'];
-    const isPassValid = validPasses.includes(cleanPassword.toLowerCase());
-    if (!isPassValid) {
-      throw new Error('Invalid credentials entered. Please check your email and password.');
+    if (!validPasses.includes(cleanPassword.toLowerCase())) {
+      throw new Error('Invalid password for Admin account. Please check your credentials.');
     }
-    const adminUser = { ...DEMO_USERS.admin, isSharedTeam: true };
+    const adminUser = { ...DEMO_USERS.admin, email: cleanEmail.includes('@') ? cleanEmail : 'admin@redcross.org', isSharedTeam: true };
     await syncUserToFirestore(adminUser);
     return adminUser;
   }
@@ -167,7 +192,7 @@ export async function loginWithCredentials(email, password) {
   if (cleanEmail === 'approver@redcross.org' || cleanEmail === 'approver') {
     const validPasses = ['redcross2026!', 'approver123', 'approver', 'redcross'];
     if (!validPasses.includes(cleanPassword.toLowerCase())) {
-      throw new Error('Invalid credentials entered. Please check your email and password.');
+      throw new Error('Invalid password for Approver account. Please check your credentials.');
     }
     return DEMO_USERS.approver;
   }
@@ -175,12 +200,44 @@ export async function loginWithCredentials(email, password) {
   if (cleanEmail === 'creator@redcross.org' || cleanEmail === 'creator') {
     const validPasses = ['redcross2026!', 'creator123', 'creator', 'redcross'];
     if (!validPasses.includes(cleanPassword.toLowerCase())) {
-      throw new Error('Invalid credentials entered. Please check your email and password.');
+      throw new Error('Invalid password for Creator account. Please check your credentials.');
     }
     return DEMO_USERS.creator;
   }
 
-  // Real Firebase Auth with strict password validation
+  // Check additional admin team profiles
+  const teamProfile = ADMIN_TEAM_PROFILES.find((p) => p.email.toLowerCase() === targetEmail);
+  if (teamProfile) {
+    const validPasses = ['redcross2026!', 'admin123', 'creator123', 'approver123', 'redcross'];
+    if (!validPasses.includes(cleanPassword.toLowerCase())) {
+      throw new Error(`Invalid password for ${teamProfile.name}. Please check your credentials.`);
+    }
+    const officerUser = {
+      uid: teamProfile.id,
+      email: teamProfile.email,
+      name: teamProfile.name,
+      role: teamProfile.role,
+      department: teamProfile.department,
+      location: teamProfile.location,
+      avatar: teamProfile.avatar,
+    };
+    await syncUserToFirestore(officerUser);
+    return officerUser;
+  }
+
+  // 2. Check Local Registered Accounts (localStorage persistence)
+  const storedUsers = getStoredUsers();
+  const localMatch = storedUsers.find((u) => u.email.toLowerCase().trim() === targetEmail);
+  if (localMatch) {
+    if (localMatch.password && localMatch.password !== cleanPassword) {
+      throw new Error('Invalid password. Please verify your password and try again.');
+    }
+    const { password: _p, ...cleanUser } = localMatch;
+    await syncUserToFirestore(cleanUser);
+    return cleanUser;
+  }
+
+  // 3. Real Firebase Auth (if initialized and active)
   if (auth) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, targetEmail, cleanPassword);
@@ -193,11 +250,12 @@ export async function loginWithCredentials(email, password) {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           name: existingData?.name || firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          role: existingData?.role || 'Administrator',
+          role: existingData?.role || 'Content Creator',
           department: existingData?.department || 'Red Cross Operations',
           location: existingData?.location || 'Sri Lanka HQ',
           isSharedTeam: isShared,
         };
+        saveStoredUser({ ...authenticatedUser, password: cleanPassword });
         await syncUserToFirestore(authenticatedUser);
         return authenticatedUser;
       }
@@ -207,25 +265,24 @@ export async function loginWithCredentials(email, password) {
         throw new Error('Invalid email or password. Please verify your login details.');
       }
       if (err.code === 'auth/user-not-found') {
-        throw new Error('Account not found. Please click "Register New User" to create an account.');
+        throw new Error('Account not found. Please click "Register New User" tab to create an account.');
+      }
+      if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address format.');
+      }
+      if (err.code === 'auth/api-key-not-valid') {
+        console.warn('Firebase API key restricted, checking local registration fallback');
+      } else if (err.message && !err.message.includes('api-key-not-valid')) {
+        throw new Error(err.message || 'Authentication failed.');
       }
     }
   }
 
-  const isShared = isSharedAdminEmail(targetEmail);
-  const fallbackUser = {
-    uid: 'user-' + Date.now(),
-    email: targetEmail,
-    name: targetEmail.split('@')[0] || 'Red Cross Officer',
-    role: isShared ? 'Administrator' : 'Content Creator',
-    isSharedTeam: isShared,
-  };
-  await syncUserToFirestore(fallbackUser);
-  return fallbackUser;
+  // 4. Reject unregistered accounts
+  throw new Error('Account not found. Please click "Register New User" tab to create an account first.');
 }
 
 export async function loginWithGoogle(customGoogleDetails) {
-  // If custom Google details were passed directly
   if (customGoogleDetails && customGoogleDetails.email) {
     const isShared = isSharedAdminEmail(customGoogleDetails.email);
     const googleUser = {
@@ -243,14 +300,12 @@ export async function loginWithGoogle(customGoogleDetails) {
     return googleUser;
   }
 
-  // Real Firebase Google Auth Popup
   if (auth) {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log('Firebase Google Auth successful:', user.email);
 
       const existingData = await getUserRoleFromFirestore(user.uid);
       const isShared = isSharedAdminEmail(user.email);
@@ -268,15 +323,15 @@ export async function loginWithGoogle(customGoogleDetails) {
       await syncUserToFirestore(googleUser);
       return googleUser;
     } catch (error) {
-      console.warn('Google Auth popup error notice:', error.code, error.message);
+      console.warn('Google Auth popup notice:', error.code, error.message);
       if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
         throw new Error('Google Sign-In popup was closed before completing login.');
       }
       if (error.code === 'auth/operation-not-allowed') {
-        throw new Error('Google Sign-In is disabled in Firebase Console. Please enable Google under Firebase Auth > Sign-in method.');
+        throw new Error('Google Sign-In is disabled in Firebase Console. Please enable Google in Firebase Auth settings.');
       }
       if (error.code === 'auth/unauthorized-domain') {
-        throw new Error('Domain not authorized. Please add redcross-social-media-platform.web.app under Firebase Auth > Settings > Authorized Domains.');
+        throw new Error('Domain not authorized. Please add domain in Firebase Auth Settings > Authorized Domains.');
       }
       throw new Error(error.message || 'Google Sign-In failed. Please try again.');
     }
@@ -287,10 +342,30 @@ export async function loginWithGoogle(customGoogleDetails) {
 
 export async function registerNewUserAccount(details) {
   const { name, email, password, role = 'Content Creator', department = 'Red Cross Operations', location = 'Colombo HQ' } = details;
-  const safeRole = role === 'Administrator' ? 'Content Creator' : role;
-  const targetEmail = email.includes('@') ? email : `${email}@redcross.org`;
-  const targetPassword = password && password.length >= 6 ? password : 'RedCross2026!';
+  const cleanEmail = (email || '').toLowerCase().trim();
+  const targetEmail = cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@redcross.org`;
+  const cleanPassword = (password || '').trim();
 
+  if (!cleanEmail) {
+    throw new Error('Please enter a valid email address.');
+  }
+  if (!cleanPassword || cleanPassword.length < 6) {
+    throw new Error('Password must be at least 6 characters long.');
+  }
+
+  // Check if email already registered in local storage
+  const storedUsers = getStoredUsers();
+  const existingLocal = storedUsers.find((u) => u.email.toLowerCase().trim() === targetEmail);
+  if (existingLocal) {
+    throw new Error('An account with this email address already exists. Please sign in instead.');
+  }
+
+  const isDemo = ['admin@redcross.org', 'creator@redcross.org', 'approver@redcross.org'].includes(targetEmail);
+  if (isDemo) {
+    throw new Error('This email address belongs to a demo account. Please sign in directly or register with a unique email.');
+  }
+
+  const safeRole = role === 'Administrator' ? 'Content Creator' : role;
   console.log('Registering new Red Cross officer account:', targetEmail);
 
   let newUserObj = {
@@ -304,7 +379,7 @@ export async function registerNewUserAccount(details) {
 
   if (auth) {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, targetEmail, targetPassword);
+      const userCredential = await createUserWithEmailAndPassword(auth, targetEmail, cleanPassword);
       const user = userCredential.user;
       newUserObj = {
         uid: user.uid,
@@ -317,25 +392,28 @@ export async function registerNewUserAccount(details) {
     } catch (err) {
       console.warn('Firebase createUser notice:', err.code, err.message);
       if (err.code === 'auth/email-already-in-use') {
-        try {
-          const userCred = await signInWithEmailAndPassword(auth, targetEmail, targetPassword);
-          newUserObj = {
-            uid: userCred.user.uid,
-            email: userCred.user.email,
-            name: name || userCred.user.email.split('@')[0],
-            role: safeRole,
-            department,
-            location,
-          };
-        } catch (signInErr) {
-          console.warn('SignIn retry notice:', signInErr.message);
-        }
+        throw new Error('This email address is already registered in Firebase. Please sign in instead.');
+      }
+      if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email format. Please check your email address.');
+      }
+      if (err.code === 'auth/weak-password') {
+        throw new Error('Password is too weak. Please use a stronger password.');
       }
     }
   }
 
+  // Store in localStorage for persistent offline/fallback authentication
+  saveStoredUser({
+    ...newUserObj,
+    password: cleanPassword,
+    createdAt: new Date().toISOString(),
+  });
+
   await syncUserToFirestore(newUserObj);
-  return newUserObj;
+
+  const { password: _p, ...cleanUser } = newUserObj;
+  return cleanUser;
 }
 
 export async function logoutUser() {
@@ -347,5 +425,6 @@ export async function logoutUser() {
     }
   }
 }
+
 
 

@@ -20,7 +20,7 @@ import {
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import Sidebar from '../components/sidebar';
 import Navbar from '../components/Navbar';
-import { syncUserToFirestore } from '../Services/authService';
+import { syncUserToFirestore, getStoredUsers } from '../Services/authService';
 import { useAuth } from '../Context/AuthContext';
 import { db } from '../Firebase/FirebaseConfig';
 
@@ -118,11 +118,33 @@ export default function Users() {
 
   useEffect(() => {
     async function loadFirestoreUsers() {
+      const fetchedMap = new Map();
+
+      // Load locally registered users first
+      const localUsers = getStoredUsers();
+      localUsers.forEach((lu) => {
+        const eKey = (lu.email || '').toLowerCase().trim();
+        if (eKey) {
+          fetchedMap.set(eKey, {
+            id: lu.uid || 'usr-local-' + Date.now(),
+            name: lu.name || eKey.split('@')[0],
+            email: lu.email,
+            role: lu.role || 'Content Creator',
+            department: lu.department || 'Red Cross Operations',
+            location: lu.location || 'Colombo HQ',
+            status: 'Active',
+            lastActive: 'Registered User',
+            postsCount: 0,
+            activity: 90,
+            avatarGradient: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+            headerGradient: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+          });
+        }
+      });
+
       if (db) {
         try {
           const querySnap = await getDocs(collection(db, 'users'));
-          const fetchedMap = new Map();
-
           if (!querySnap.empty) {
             querySnap.forEach((docSnap) => {
               const data = docSnap.data();
@@ -146,40 +168,40 @@ export default function Users() {
               }
             });
           }
-
-          // Ensure the currently logged-in user is ALWAYS in the list
-          if (currentUser && currentUser.email) {
-            const currentEmailKey = currentUser.email.toLowerCase().trim();
-            if (!fetchedMap.has(currentEmailKey)) {
-              fetchedMap.set(currentEmailKey, {
-                id: currentUser.uid || 'usr-current',
-                name: currentUser.name || currentEmailKey.split('@')[0],
-                email: currentUser.email,
-                role: currentUser.role || 'Content Creator',
-                department: currentUser.department || 'Red Cross Operations',
-                location: currentUser.location || 'Colombo HQ',
-                status: 'Active',
-                lastActive: 'Online Now',
-                postsCount: 15,
-                activity: 98,
-                avatarGradient: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
-                headerGradient: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)',
-              });
-            }
-          }
-
-          const fetched = Array.from(fetchedMap.values());
-
-          // Merge with initial fallback list without duplicate emails
-          setUsers((prev) => {
-            const existingEmails = new Set(fetched.map((f) => f.email.toLowerCase()));
-            const filteredPrev = prev.filter((p) => !existingEmails.has(p.email.toLowerCase()));
-            return [...fetched, ...filteredPrev];
-          });
         } catch (err) {
           console.warn('Firestore load users notice:', err.message);
         }
       }
+
+      // Ensure the currently logged-in user is ALWAYS in the list
+      if (currentUser && currentUser.email) {
+        const currentEmailKey = currentUser.email.toLowerCase().trim();
+        if (!fetchedMap.has(currentEmailKey)) {
+          fetchedMap.set(currentEmailKey, {
+            id: currentUser.uid || 'usr-current',
+            name: currentUser.name || currentEmailKey.split('@')[0],
+            email: currentUser.email,
+            role: currentUser.role || 'Content Creator',
+            department: currentUser.department || 'Red Cross Operations',
+            location: currentUser.location || 'Colombo HQ',
+            status: 'Active',
+            lastActive: 'Online Now',
+            postsCount: 15,
+            activity: 98,
+            avatarGradient: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
+            headerGradient: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)',
+          });
+        }
+      }
+
+      const fetched = Array.from(fetchedMap.values());
+
+      // Merge with initial fallback list without duplicate emails
+      setUsers((prev) => {
+        const existingEmails = new Set(fetched.map((f) => f.email.toLowerCase()));
+        const filteredPrev = prev.filter((p) => !existingEmails.has(p.email.toLowerCase()));
+        return [...fetched, ...filteredPrev];
+      });
     }
 
     loadFirestoreUsers();
