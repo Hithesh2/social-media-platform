@@ -6,6 +6,7 @@ import { getFirestore } from 'firebase/firestore';
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD6RSFYz07qlfanlRUMxU3S9j97moPQ9dk",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "redcross-social-media-platform.firebaseapp.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://redcross-social-media-platform-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "redcross-social-media-platform",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "redcross-social-media-platform.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "588898067299",

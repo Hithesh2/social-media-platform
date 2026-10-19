@@ -23,11 +23,14 @@ export default function Login() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [regName, setRegName] = useState('');
   const [regRole, setRegRole] = useState('Content Creator');
   const [regDepartment, setRegDepartment] = useState('Community Operations Unit');
   const [regLocation, setRegLocation] = useState('Colombo HQ');
+  const [touched, setTouched] = useState({});
   const [error, setError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -35,14 +38,70 @@ export default function Login() {
   const { login, loginWithGoogleAccount, registerUser } = useAuth();
   const navigate = useNavigate();
 
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleTabToggle = (registerMode) => {
+    setIsRegisterMode(registerMode);
+    setError('');
+    setSuccessNotice('');
+    setTouched({});
+    setConfirmPassword('');
+  };
+
+  const getPasswordStrength = (pass) => {
+    if (!pass) return { label: '', score: 0, color: '#CBD5E1', width: '0%' };
+    if (pass.length < 6) return { label: 'Weak (Min 6 chars)', score: 1, color: '#EF4444', width: '33%' };
+    
+    let score = 2;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+    if (pass.length >= 8) score++;
+
+    if (score <= 2) return { label: 'Fair', score: 2, color: '#F59E0B', width: '66%' };
+    return { label: 'Strong Password', score: 3, color: '#10B981', width: '100%' };
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+
+  const fieldErrors = {
+    regName: isRegisterMode && touched.regName && !regName.trim() ? 'Officer full name is required' : '',
+    email: touched.email && !email.trim()
+      ? 'Email address is required'
+      : touched.email && !EMAIL_PATTERN.test(email.trim())
+      ? 'Please enter a valid email address (e.g. name@redcross.org)'
+      : '',
+    password: touched.password && !password.trim()
+      ? 'Password is required'
+      : touched.password && password.trim().length < 6
+      ? 'Password must be at least 6 characters long'
+      : '',
+    confirmPassword: isRegisterMode && touched.confirmPassword && !confirmPassword.trim()
+      ? 'Please confirm your password'
+      : isRegisterMode && touched.confirmPassword && confirmPassword !== password
+      ? 'Passwords do not match'
+      : '',
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessNotice('');
+    setTouched({ email: true, password: true, confirmPassword: true, regName: true });
 
     if (isRegisterMode) {
       if (!regName.trim()) {
         setError('Please enter your full officer name.');
+        return;
+      }
+      if (!confirmPassword.trim()) {
+        setError('Please confirm your password.');
+        return;
+      }
+      if (confirmPassword !== password) {
+        setError('Passwords do not match. Please re-enter matching passwords.');
         return;
       }
     }
@@ -166,14 +225,14 @@ export default function Login() {
               <button
                 type="button"
                 className={`rc-auth-tab${!isRegisterMode ? ' is-active' : ''}`}
-                onClick={() => setIsRegisterMode(false)}
+                onClick={() => handleTabToggle(false)}
               >
                 Sign In
               </button>
               <button
                 type="button"
                 className={`rc-auth-tab${isRegisterMode ? ' is-active' : ''}`}
-                onClick={() => setIsRegisterMode(true)}
+                onClick={() => handleTabToggle(true)}
               >
                 Register New User
               </button>
@@ -206,7 +265,7 @@ export default function Login() {
                 <>
                   <div className="rc-form-group">
                     <label htmlFor="reg-name">Full Officer Name *</label>
-                    <div className="rc-input-box">
+                    <div className={`rc-input-box${fieldErrors.regName ? ' is-invalid' : ''}`}>
                       <FiUser size={16} />
                       <input
                         id="reg-name"
@@ -214,9 +273,16 @@ export default function Login() {
                         name="name"
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
+                        onBlur={() => handleBlur('regName')}
                         placeholder="e.g. Dr. Mahesh Kularatne"
                       />
                     </div>
+                    {fieldErrors.regName && (
+                      <div className="rc-field-error">
+                        <FiAlertCircle size={13} />
+                        <span>{fieldErrors.regName}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="rc-form-group">
@@ -272,7 +338,7 @@ export default function Login() {
 
               <div className="rc-form-group">
                 <label htmlFor="login-email">Email Address *</label>
-                <div className="rc-input-box">
+                <div className={`rc-input-box${fieldErrors.email ? ' is-invalid' : ''}`}>
                   <FiMail size={16} />
                   <input
                     id="login-email"
@@ -280,17 +346,24 @@ export default function Login() {
                     name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => handleBlur('email')}
                     placeholder="name@redcross.org"
                     autoComplete="username"
                   />
                 </div>
+                {fieldErrors.email && (
+                  <div className="rc-field-error">
+                    <FiAlertCircle size={13} />
+                    <span>{fieldErrors.email}</span>
+                  </div>
+                )}
               </div>
 
               <div className="rc-form-group">
                 <div className="rc-label-row">
                   <label htmlFor="login-password">Password *</label>
                 </div>
-                <div className="rc-input-box">
+                <div className={`rc-input-box${fieldErrors.password ? ' is-invalid' : ''}`}>
                   <FiLock size={16} />
                   <input
                     id="login-password"
@@ -298,6 +371,7 @@ export default function Login() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => handleBlur('password')}
                     placeholder="••••••••••••"
                     autoComplete="current-password"
                   />
@@ -310,7 +384,62 @@ export default function Login() {
                     {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                   </button>
                 </div>
+                {fieldErrors.password && (
+                  <div className="rc-field-error">
+                    <FiAlertCircle size={13} />
+                    <span>{fieldErrors.password}</span>
+                  </div>
+                )}
+                {isRegisterMode && password.length > 0 && (
+                  <div style={{ marginTop: '4px' }}>
+                    <div className="rc-password-meter-track">
+                      <div
+                        className="rc-password-meter-fill"
+                        style={{ width: passwordStrength.width, backgroundColor: passwordStrength.color }}
+                      />
+                    </div>
+                    <span style={{ fontSize: '11px', color: passwordStrength.color, fontWeight: 600 }}>
+                      Password Strength: {passwordStrength.label}
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* Confirm Password Field for Registration */}
+              {isRegisterMode && (
+                <div className="rc-form-group">
+                  <div className="rc-label-row">
+                    <label htmlFor="reg-confirm-password">Confirm Password *</label>
+                  </div>
+                  <div className={`rc-input-box${fieldErrors.confirmPassword ? ' is-invalid' : ''}`}>
+                    <FiLock size={16} />
+                    <input
+                      id="reg-confirm-password"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onBlur={() => handleBlur('confirmPassword')}
+                      placeholder="••••••••••••"
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      className="rc-pass-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                    </button>
+                  </div>
+                  {fieldErrors.confirmPassword && (
+                    <div className="rc-field-error">
+                      <FiAlertCircle size={13} />
+                      <span>{fieldErrors.confirmPassword}</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {successNotice && (
                 <div className="rc-login-alert success" role="status">

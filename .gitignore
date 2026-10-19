@@ -12,6 +12,8 @@ dist-ssr
 *.local
 .env
 serviceAccountKey.json
+.firebase/
+full_platform_demo.webp
 
 # Editor directories and files
 .vscode/*
